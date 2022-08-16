@@ -4,8 +4,13 @@
 int main()
 {
     // Open the video camera.
-    // Remove the videoflip element if rotation is not needed. https://gstreamer.freedesktop.org/documentation/videofilter/videoflip.html?gi-language=c
-    std::string pipeline = "libcamerasrc ! video/x-raw, width=800, height=600, framerate=15/1 ! videoflip method=rotate-180 ! videoconvert ! appsink";
+    std::string pipeline = "libcamerasrc"
+        " ! video/x-raw, width=800, height=600" // camera needs to capture at a higher resolution
+        " ! videoconvert"
+        " ! videoscale"
+        " ! video/x-raw, width=400, height=300" // can downsample the image after capturing
+        " ! videoflip method=rotate-180" // remove this line if the image is upside-down
+        " ! appsink drop=true max_buffers=2";
     cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
     if(!cap.isOpened()) {
         printf("Could not open camera.\n");
